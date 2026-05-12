@@ -90,8 +90,9 @@ const tools = [
 ];
 
 // Configurar el modelo con el rol de sistema estricto
+// Se utiliza la version estable mas reciente para optimizar latencia
 const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.1-flash-lite",
     tools: tools,
     systemInstruction: "Eres un copiloto inteligente de un vehiculo ADAS. Tu objetivo es la personalizacion y mejora de la experiencia a bordo. Analiza el estado de los sensores y la peticion del usuario para orquestar acciones que lleguen a su comodidad. Si el usuario pide o pregunta algo que no tenga relacion con el confort, el estado o la conduccion del vehiculo, responde estrictamente con la frase 'No puedo ayudarte con eso' y no llames a ninguna funcion."
 });
@@ -101,7 +102,6 @@ async function procesarComando(transcripcion, estadoActual) {
     try {
         const chat = model.startChat();
         
-        // Crear el prompt uniendo el contexto del vehiculo y la peticion
         const prompt = `
             Estado actual del vehiculo: ${JSON.stringify(estadoActual)}
             Peticion del conductor: "${transcripcion}"
@@ -111,7 +111,6 @@ async function procesarComando(transcripcion, estadoActual) {
         const result = await chat.sendMessage(prompt);
         const response = result.response;
         
-        // Extraer las llamadas a funciones si existen
         const calls = response.functionCalls();
         
         if (calls) {
@@ -124,7 +123,6 @@ async function procesarComando(transcripcion, estadoActual) {
             };
         }
 
-        // Devolver texto simple si no hay funciones a ejecutar
         return {
             tipo: "texto",
             respuesta: response.text()
@@ -136,5 +134,4 @@ async function procesarComando(transcripcion, estadoActual) {
     }
 }
 
-// Exportar modulo
 module.exports = { procesarComando };
