@@ -11,7 +11,7 @@
 
 ## ✨ Características Principales
 
-* [cite_start]**Comprensión Contextual:** Gracias a Gemini 3.1 Flash Lite, el sistema entiende intenciones como *"hace calor"* o *"la resolana está fuerte"* para actuar sobre el clima o las ventanas[cite: 28].
+* [cite_start]**Comprensión Contextual:** Gracias a Gemini 3.1 Flash Lite, el sistema entiende intenciones como *"hace calor"* o *"la resolana está fuerte"* para actuar sobre el clima o las ventanas.
 * **Gemelo Digital (State Management):** Sincronización constante entre un estado JSON persistente y la interfaz visual.
 * **Control de Dominio Estricto:** La IA está programada para filtrar peticiones ajenas a la conducción, respondiendo únicamente a necesidades del vehículo.
 * **Arquitectura Reactiva:** Comunicación bidireccional mediante WebSockets para actualizaciones de telemetría instantáneas.
@@ -21,7 +21,7 @@
 
 | Componente | Tecnología | Propósito |
 | :--- | :--- | :--- |
-| **Cerebro (LLM)** | [cite_start]Gemini 3.1 Flash Lite [cite: 28] | Razonamiento y Function Calling. |
+| **Cerebro (LLM)** | Gemini 3.1 Flash Lite | Razonamiento y Function Calling. |
 | **Backend** | Node.js & Express | Orquestación y API Server. |
 | **Comunicación** | Socket.io | Datos bidireccionales en tiempo real. |
 | **Voz (STT)** | Web Speech API | Transcripción nativa en navegador. |
@@ -35,7 +35,7 @@
 El flujo de datos sigue un ciclo de retroalimentación cerrado:
 
 1.  **Captura:** El usuario emite un comando de voz procesado por el navegador.
-2.  [cite_start]**Traducción:** El servidor envía la transcripción y el estado actual al modelo Gemini 3.1 Flash Lite[cite: 28].
-3.  [cite_start]**Lógica:** El `logicController` procesa las funciones llamadas por la IA (Thinking activo)[cite: 29].
+2. **Traducción:** El servidor envía la transcripción y el estado actual al modelo Gemini 3.1 Flash Lite[cite: 28].
+3.  **Lógica:** El `logicController` procesa las funciones llamadas por la IA (Thinking activo)[cite: 29].
 4.  **Persistencia:** El `stateManager` actualiza el archivo JSON local.
 5.  **Reflejo:** Socket.io emite el nuevo estado a todos los clientes conectados.
