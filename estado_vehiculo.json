@@ -1,0 +1,36 @@
+{
+  "entorno_exterior": {
+    "temperatura_grados": 28.5,
+    "limpiaparabrisas": "apagado"
+  },
+  "climatizacion_hvac": {
+    "aire_acondicionado_activo": false,
+    "temperatura_objetivo_grados": 22.0,
+    "velocidad_ventilador": 1,
+    "recirculacion_activa": false
+  },
+  "carroceria_accesos": {
+    "ventanas_porcentaje_apertura": {
+      "piloto": 0,
+      "copiloto": 0,
+      "trasera_izquierda": 0,
+      "trasera_derecha": 0
+    },
+    "seguros_bloqueados": true
+  },
+  "iluminacion": {
+    "faros_principales": "automatico",
+    "luz_cortesia_encendida": false
+  },
+  "telemetria_marcha": {
+    "velocidad_kmh": 0,
+    "nivel_gasolina_porcentaje": 65,
+    "posicion_palanca": "P",
+    "motor_encendido": true
+  },
+  "infoentretenimiento": {
+    "multimedia_reproduciendo": true,
+    "volumen_audio_porcentaje": 15,
+    "fuente_audio": "bluetooth"
+  }
+}
