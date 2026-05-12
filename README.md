@@ -35,7 +35,7 @@
 El flujo de datos sigue un ciclo de retroalimentación cerrado:
 
 1.  **Captura:** El usuario emite un comando de voz procesado por el navegador.
-2. **Traducción:** El servidor envía la transcripción y el estado actual al modelo Gemini 3.1 Flash Lite[cite: 28].
-3.  **Lógica:** El `logicController` procesa las funciones llamadas por la IA (Thinking activo)[cite: 29].
+2. **Traducción:** El servidor envía la transcripción y el estado actual al modelo Gemini 3.1 Flash Lite.
+3.  **Lógica:** El `logicController` procesa las funciones llamadas por la IA (Thinking activo).
 4.  **Persistencia:** El `stateManager` actualiza el archivo JSON local.
 5.  **Reflejo:** Socket.io emite el nuevo estado a todos los clientes conectados.
