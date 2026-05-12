@@ -4,17 +4,15 @@
     "limpiaparabrisas": "apagado"
   },
   "climatizacion_hvac": {
-    "aire_acondicionado_activo": false,
-    "temperatura_objetivo_grados": 22.0,
-    "velocidad_ventilador": 1,
+    "temperatura_objetivo_grados": 25,
     "recirculacion_activa": false
   },
   "carroceria_accesos": {
     "ventanas_porcentaje_apertura": {
-      "piloto": 0,
-      "copiloto": 0,
-      "trasera_izquierda": 0,
-      "trasera_derecha": 0
+      "piloto": 1,
+      "copiloto": 1,
+      "trasera_izquierda": 1,
+      "trasera_derecha": 1
     },
     "seguros_bloqueados": true
   },

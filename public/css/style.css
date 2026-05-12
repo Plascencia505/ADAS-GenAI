@@ -1,0 +1,164 @@
+/* Definir variables de colores minimalistas */
+:root {
+    --bg-principal: #0a0a0a;
+    --bg-panel: #171717;
+    --texto-primario: #f3f4f6;
+    --texto-secundario: #9ca3af;
+    --acento-borde: #262626;
+    --color-activo: #3b82f6;
+}
+
+/* Resetear margenes y tipografia */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Configurar cuerpo de la pagina */
+body {
+    background-color: var(--bg-principal);
+    color: var(--texto-primario);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Distribuir layout principal con Grid */
+.dashboard {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    height: 100%;
+    gap: 1px;
+    background-color: var(--acento-borde);
+}
+
+/* Estilizar panel izquierdo de telemetria */
+.panel-telemetria {
+    background-color: var(--bg-panel);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilizar panel derecho contenedor */
+.panel-interaccion {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-principal);
+}
+
+/* Configurar area de microfono como boton gigante */
+.area-voz {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid var(--acento-borde);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Proveer feedback visual al presionar o activar */
+.area-voz:hover {
+    background-color: #121212;
+}
+
+.area-voz.grabando {
+    background-color: #1e1b4b;
+}
+
+/* Ocultar boton por defecto y usar el area completa */
+#btn-microfono {
+    display: none;
+}
+
+/* Estilizar texto de estado del microfono */
+#texto-transcrito {
+    font-size: 1.5rem;
+    color: var(--texto-secundario);
+    margin-top: 1rem;
+    text-align: center;
+    max-width: 80%;
+}
+
+/* Estilizar consola inferior de acciones */
+.area-registro {
+    height: 30%;
+    background-color: var(--bg-panel);
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* Formatear lista de eventos del sistema */
+#lista-acciones {
+    list-style: none;
+    margin-top: 1rem;
+    color: var(--texto-secundario);
+}
+
+#lista-acciones li {
+    margin-bottom: 0.5rem;
+    border-left: 2px solid var(--color-activo);
+    padding-left: 1rem;
+}
+
+/* Alinear iconos con el texto de telemetria */
+.dato-telemetria {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--acento-borde);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Configurar tamaño base de los iconos */
+.dato-telemetria i {
+    font-size: 1.3rem;
+    width: 25px;
+    text-align: center;
+    transition: color 0.3s ease;
+}
+
+/* Definir colores de estado para inyectar desde JS */
+.icono-inactivo { color: var(--texto-secundario); }
+.icono-activo { color: var(--color-activo); }
+.icono-alerta { color: #ef4444; }
+
+/* Contenedor tipo columna para datos compuestos */
+.dato-telemetria-columna {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--acento-borde);
+}
+
+/* Estructurar la sub-lista de ventanas */
+.lista-ventanas {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+    padding-left: 37px; /* Alinear texto saltando el icono */
+    font-size: 0.95rem;
+    color: var(--texto-secundario);
+}
+
+/* Formatear items individuales de la lista */
+.ventana-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Resaltar ventana del piloto de forma no intrusiva */
+.ventana-piloto {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--texto-primario);
+    font-weight: 500;
+    border-left: 2px solid var(--color-activo);
+}
