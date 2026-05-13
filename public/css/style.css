@@ -162,3 +162,76 @@ body {
     font-weight: 500;
     border-left: 2px solid var(--color-activo);
 }
+
+/* --- Corrección del Bug de Desplazamiento --- */
+.area-registro {
+    height: 30%;
+    background-color: var(--bg-panel);
+    padding: 2rem;
+    overflow: hidden; /* Evita que el contenedor crezca y rompa el layout */
+    display: flex;
+    flex-direction: column;
+}
+
+#lista-acciones {
+    list-style: none;
+    margin-top: 1rem;
+    color: var(--texto-secundario);
+    overflow-y: hidden; /* Mantenemos todo estático */
+}
+
+/* --- LED de Conexión Reactivo --- */
+.led {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-left: 10px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.led-desconectado {
+    background-color: #ef4444;
+    box-shadow: 0 0 6px #ef4444;
+}
+
+.led-conectado {
+    background-color: #10b981;
+    box-shadow: 0 0 8px #10b981;
+}
+
+/* --- Animación de Onda de Audio --- */
+#onda-audio {
+    display: flex;
+    gap: 6px;
+    height: 40px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.onda-oculta {
+    display: none !important;
+}
+
+.onda-activa {
+    display: flex;
+}
+
+.onda-activa .barra {
+    width: 6px;
+    height: 10px;
+    background-color: var(--color-activo);
+    border-radius: 3px;
+    animation: saltar 1s infinite ease-in-out;
+}
+
+/* Desfasar las animaciones para simular voz */
+.onda-activa .barra:nth-child(1) { animation-delay: 0.1s; }
+.onda-activa .barra:nth-child(2) { animation-delay: 0.3s; }
+.onda-activa .barra:nth-child(3) { animation-delay: 0s; }
+.onda-activa .barra:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes saltar {
+    0%, 100% { height: 10px; }
+    50% { height: 35px; }
+}

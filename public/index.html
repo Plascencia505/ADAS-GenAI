@@ -11,7 +11,7 @@
     <main class="dashboard">
         
         <section class="panel-telemetria">
-            <h2>Estado del Vehículo</h2>
+            <h2>Estado del Vehículo <span id="led-conexion" class="led led-desconectado"></span></h2>
             <div id="contenedor-estado">
                 <p class="mensaje-sistema">Sincronizando con módulos de control...</p>
             </div>
@@ -19,6 +19,13 @@
 
         <section class="panel-interaccion">
             <div class="area-voz">
+                <div id="onda-audio" class="onda-oculta">
+                    <div class="barra"></div>
+                    <div class="barra"></div>
+                    <div class="barra"></div>
+                    <div class="barra"></div>
+                </div>
+                
                 <button id="btn-microfono" class="btn-primario">Hablar al Asistente</button>
                 <p id="texto-transcrito" class="texto-secundario">Sistema en espera...</p>
             </div>
@@ -26,8 +33,7 @@
             <div class="area-registro">
                 <h3>Acciones del Sistema</h3>
                 <ul id="lista-acciones">
-                    <li>Módulos inicializados correctamente.</li>
-                </ul>
+                    </ul>
             </div>
         </section>
 

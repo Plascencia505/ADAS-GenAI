@@ -1,17 +1,15 @@
-// Inicializar conexion bidireccional
 const socket = io();
 
-// Obtener referencias del DOM
 const areaVoz = document.querySelector('.area-voz');
 const textoTranscrito = document.getElementById('texto-transcrito');
 const listaAcciones = document.getElementById('lista-acciones');
 const contenedorEstado = document.getElementById('contenedor-estado');
+const ledConexion = document.getElementById('led-conexion');
+const ondaAudio = document.getElementById('onda-audio');
 
-// Declarar variables de estado
 let estaGrabando = false;
 let recognition;
 
-// Funcion auxiliar para construir nodos del DOM de forma segura
 function crearFilaTelemetria(clasesIcono, etiqueta, valorTexto) {
     const contenedorFila = document.createElement('div');
     contenedorFila.className = 'dato-telemetria';
@@ -20,7 +18,6 @@ function crearFilaTelemetria(clasesIcono, etiqueta, valorTexto) {
     icono.className = clasesIcono;
 
     const envolturaTexto = document.createElement('span');
-    
     const textoNegrita = document.createElement('strong');
     textoNegrita.textContent = `${etiqueta}: `;
     
@@ -33,37 +30,34 @@ function crearFilaTelemetria(clasesIcono, etiqueta, valorTexto) {
     return contenedorFila;
 }
 
-// Renderizar parametros usando manipulacion segura del DOM
 function renderizarTelemetria(estado) {
     contenedorEstado.textContent = '';
     
     const { entorno_exterior, climatizacion_hvac, carroceria_accesos, iluminacion, infoentretenimiento } = estado;
 
-    // Procesar datos estandar
+    // Datos de Clima y Luces 
     const acActivo = climatizacion_hvac.aire_acondicionado_activo;
     const claseIconoAC = acActivo ? 'fa-solid fa-snowflake icono-activo' : 'fa-solid fa-fan icono-inactivo';
     const textoAC = acActivo ? `Enfriando a ${climatizacion_hvac.temperatura_objetivo_grados}°C` : 'Ventilación apagada';
 
-    const segurosBloqueados = carroceria_accesos.seguros_bloqueados;
-    const claseIconoSeguros = segurosBloqueados ? 'fa-solid fa-lock icono-inactivo' : 'fa-solid fa-lock-open icono-alerta';
-    const textoSeguros = segurosBloqueados ? 'Puertas bloqueadas' : 'Puertas desbloqueadas';
-
     const modoFaros = iluminacion.faros_principales;
     const claseIconoLuces = modoFaros === 'apagado' ? 'fa-regular fa-lightbulb icono-inactivo' : 'fa-solid fa-lightbulb icono-activo';
-    const textoLuces = `Faros en modo ${modoFaros}`;
+    const textoLuces = `Faros ${modoFaros}`;
 
+    // Datos de Multimedia
     const reproduciendo = infoentretenimiento.multimedia_reproduciendo;
+    const volumen = infoentretenimiento.volumen_audio_porcentaje;
+    const titulo = infoentretenimiento.titulo_contenido || "Sin contenido";
     const claseIconoMedia = reproduciendo ? 'fa-solid fa-music icono-activo' : 'fa-solid fa-pause icono-inactivo';
-    const textoMedia = reproduciendo ? `Volumen al ${infoentretenimiento.volumen_audio_porcentaje}%` : 'Sistema pausado';
+    const textoMedia = reproduciendo ? `${titulo} (Vol: ${volumen}%)` : `Pausado - ${titulo}`;
 
-    // Inyectar datos estandar
+    // Inyectar datos base
     contenedorEstado.appendChild(crearFilaTelemetria('fa-solid fa-cloud-sun icono-activo', 'Exterior', `${entorno_exterior.temperatura_grados}°C`));
     contenedorEstado.appendChild(crearFilaTelemetria(claseIconoAC, 'Climatización', textoAC));
-    contenedorEstado.appendChild(crearFilaTelemetria(claseIconoSeguros, 'Seguridad', textoSeguros));
     contenedorEstado.appendChild(crearFilaTelemetria(claseIconoLuces, 'Iluminación', textoLuces));
     contenedorEstado.appendChild(crearFilaTelemetria(claseIconoMedia, 'Multimedia', textoMedia));
 
-    // Construir estructura jerarquica para las ventanas
+    // Sección de Ventanas 
     const contenedorVentanas = document.createElement('div');
     contenedorVentanas.className = 'dato-telemetria-columna';
 
@@ -77,16 +71,14 @@ function renderizarTelemetria(estado) {
     listaVentanas.className = 'lista-ventanas';
 
     const ventanas = carroceria_accesos.ventanas_porcentaje_apertura;
-    // Forzar que el piloto sea siempre el primer elemento del arreglo
-    const orden = ['piloto', ...Object.keys(ventanas).filter(k => k !== 'piloto')];
+    const ordenVentanas = ['piloto', ...Object.keys(ventanas).filter(k => k !== 'piloto')];
 
-    orden.forEach(posicion => {
+    ordenVentanas.forEach(posicion => {
         if (ventanas[posicion] !== undefined) {
             const item = document.createElement('div');
             item.className = posicion === 'piloto' ? 'ventana-item ventana-piloto' : 'ventana-item';
             
             const textoPosicion = document.createElement('span');
-            // Capitalizar texto y remover guiones bajos
             textoPosicion.textContent = posicion.charAt(0).toUpperCase() + posicion.slice(1).replace('_', ' ');
             
             const textoValor = document.createElement('span');
@@ -97,35 +89,77 @@ function renderizarTelemetria(estado) {
             listaVentanas.appendChild(item);
         }
     });
-
     contenedorVentanas.appendChild(listaVentanas);
     contenedorEstado.appendChild(contenedorVentanas);
+
+    // Sección de Seguros
+    const contenedorSeguros = document.createElement('div');
+    contenedorSeguros.className = 'dato-telemetria-columna';
+
+    const cabeceraSeguros = crearFilaTelemetria('fa-solid fa-shield-halved icono-activo', 'Seguros', 'Estado por puerta:');
+    cabeceraSeguros.style.borderBottom = 'none';
+    cabeceraSeguros.style.marginBottom = '0';
+    cabeceraSeguros.style.paddingBottom = '0';
+    contenedorSeguros.appendChild(cabeceraSeguros);
+
+    const listaSeguros = document.createElement('div');
+    listaSeguros.className = 'lista-ventanas'; // Reutilizamos la clase CSS para el layout
+
+    const seguros = carroceria_accesos.seguros_bloqueados;
+    const ordenSeguros = ['piloto', ...Object.keys(seguros).filter(k => k !== 'piloto')];
+
+    ordenSeguros.forEach(posicion => {
+        if (seguros[posicion] !== undefined) {
+            const item = document.createElement('div');
+            item.className = posicion === 'piloto' ? 'ventana-item ventana-piloto' : 'ventana-item';
+            
+            const textoPosicion = document.createElement('span');
+            textoPosicion.textContent = posicion.charAt(0).toUpperCase() + posicion.slice(1).replace('_', ' ');
+            
+            const contenedorValor = document.createElement('span');
+            const iconoSeguro = document.createElement('i');
+            iconoSeguro.className = seguros[posicion] ? 'fa-solid fa-lock icono-inactivo' : 'fa-solid fa-lock-open icono-alerta';
+            iconoSeguro.style.marginRight = '6px';
+            
+            contenedorValor.appendChild(iconoSeguro);
+            contenedorValor.appendChild(document.createTextNode(seguros[posicion] ? 'Bloqueado' : 'Desbloqueado'));
+
+            item.appendChild(textoPosicion);
+            item.appendChild(contenedorValor);
+            listaSeguros.appendChild(item);
+        }
+    });
+    contenedorSeguros.appendChild(listaSeguros);
+    contenedorEstado.appendChild(contenedorSeguros);
 }
 
-// Agregar eventos de forma segura al historial
 function agregarAccionHistorial(mensajeCrudo) {
     const nuevoElemento = document.createElement('li');
     nuevoElemento.textContent = mensajeCrudo; 
     listaAcciones.prepend(nuevoElemento);
+
+    while (listaAcciones.children.length > 4) {
+        listaAcciones.removeChild(listaAcciones.lastChild);
+    }
 }
 
-// Escuchar eventos de conexion
 socket.on('connect', () => {
-    agregarAccionHistorial('Conexión establecida con el controlador central.');
+    ledConexion.classList.replace('led-desconectado', 'led-conectado');
 });
 
-// Escuchar actualizacion de telemetria
+socket.on('disconnect', () => {
+    ledConexion.classList.replace('led-conectado', 'led-desconectado');
+});
+
 socket.on('estado_vehiculo', (estado) => {
     renderizarTelemetria(estado);
 });
 
-// NUEVO: Escuchar respuestas en texto de la IA
 socket.on('notificacion_asistente', (mensaje) => {
     textoTranscrito.textContent = mensaje;
     agregarAccionHistorial(`Copiloto: ${mensaje}`);
 });
 
-// Configurar API Web Speech
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 if (!SpeechRecognition) {
@@ -140,6 +174,8 @@ if (!SpeechRecognition) {
     recognition.onstart = () => {
         estaGrabando = true;
         areaVoz.classList.add('grabando');
+        
+        ondaAudio.classList.replace('onda-oculta', 'onda-activa');
         textoTranscrito.textContent = 'Te escucho...';
     };
 
@@ -153,12 +189,15 @@ if (!SpeechRecognition) {
     recognition.onend = () => {
         estaGrabando = false;
         areaVoz.classList.remove('grabando');
+        
+        ondaAudio.classList.replace('onda-activa', 'onda-oculta');
     };
 
     recognition.onerror = (event) => {
         textoTranscrito.textContent = "Error al capturar audio. Reintenta.";
         estaGrabando = false;
         areaVoz.classList.remove('grabando');
+        ondaAudio.classList.replace('onda-activa', 'onda-oculta');
     };
 
     areaVoz.addEventListener('click', () => {
