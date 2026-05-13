@@ -53,7 +53,7 @@ const tools = [
                     properties: {
                         faros_principales: { 
                             type: "STRING", 
-                            enum: ["apagado", "encendido", "automatico"] 
+                            enum: ["apagado", "encendido"] 
                         },
                         luz_cortesia_encendida: { type: "BOOLEAN" }
                     }
@@ -61,7 +61,7 @@ const tools = [
             },
             {
                 name: "gestionar_multimedia",
-                description: "Controla la reproduccion de audio, volumen y fuente",
+                description: "Controla la reproduccion de audio, volumen, fuente y la seleccion de contenido",
                 parameters: {
                     type: "OBJECT",
                     properties: {
@@ -70,6 +70,10 @@ const tools = [
                         fuente_audio: { 
                             type: "STRING", 
                             enum: ["radio", "bluetooth", "usb"] 
+                        },
+                        titulo_contenido: {
+                            type: "STRING",
+                            description: "Nombre de la estacion de radio, cancion, artista o podcast solicitado"
                         }
                     }
                 }
