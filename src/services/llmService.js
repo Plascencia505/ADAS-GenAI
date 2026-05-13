@@ -40,7 +40,15 @@ const tools = [
                 parameters: {
                     type: "OBJECT",
                     properties: {
-                        seguros_bloqueados: { type: "BOOLEAN" }
+                        seguros_bloqueados: { 
+                            type: "OBJECT",
+                            properties: {
+                                piloto: { type: "BOOLEAN" },
+                                copiloto: { type: "BOOLEAN" },
+                                trasera_izquierda: { type: "BOOLEAN" },
+                                trasera_derecha: { type: "BOOLEAN" }
+                            }
+                        }
                     },
                     required: ["seguros_bloqueados"]
                 }
@@ -53,7 +61,7 @@ const tools = [
                     properties: {
                         faros_principales: { 
                             type: "STRING", 
-                            enum: ["apagado", "encendido"] 
+                            enum: ["apagados", "encendidos"] 
                         },
                         luz_cortesia_encendida: { type: "BOOLEAN" }
                     }
