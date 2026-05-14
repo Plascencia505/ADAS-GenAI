@@ -1,6 +1,45 @@
 const { leerEstado, actualizarEstado } = require('../utils/stateManager');
 const { procesarComando } = require('../services/llmService');
 const { procesarAcciones } = require('../controllers/logicController');
+const { SerialPort } = require('serialport');
+
+// Configuración del enlace físico con el microcontrolador
+const puertoSerial = new SerialPort({
+    path: 'COM11',
+    baudRate: 115200,
+    autoOpen: true
+});
+
+puertoSerial.on('open', () => {
+    console.log('Enlace serial establecido con éxito en COM11 a 115200 baudios.');
+});
+
+puertoSerial.on('error', (err) => {
+    console.warn('Advertencia del puerto serial (¿ESP32 desconectado?):', err.message);
+});
+
+// Función aislada para empaquetar y transmitir la telemetría al hardware
+function sincronizarHardware(estado) {
+    try {
+        const faros = estado.iluminacion.faros_principales !== 'apagado' ? 1 : 0;
+
+        const porcentajeVentana = estado.carroceria_accesos.ventanas_porcentaje_apertura.piloto || 0;
+        const gradosServo = Math.round(90 - (porcentajeVentana * 0.9));
+
+        const titulo = estado.infoentretenimiento.titulo_contenido || "Sin contenido";
+        const tituloLimpio = titulo.replace(/(\r\n|\n|\r)/gm, " ");
+
+        // Ensamblar la trama de datos con delimitadores precisos y salto de línea final
+        const tramaDatos = `F:${faros}|V:${gradosServo}|M:${tituloLimpio}\n`;
+        
+        // Disparar la trama por el cable USB
+        puertoSerial.write(tramaDatos);
+        console.log(`[TX SERIAL] Trama física transmitida: ${tramaDatos.trim()}`);
+        
+    } catch (error) {
+        console.error('Error al empaquetar los datos para el ESP32:', error);
+    }
+}
 
 // Configurar los eventos del socket
 function configurarSockets(io) {
@@ -11,6 +50,8 @@ function configurarSockets(io) {
             // Enviar telemetria inicial al conectar
             const estadoInicial = await leerEstado();
             socket.emit('estado_vehiculo', estadoInicial);
+            // Sincronizar la maqueta física con el estado de arranque
+            sincronizarHardware(estadoInicial);
         } catch (error) {
             console.error('Fallo al recuperar telemetria inicial', error);
         }
@@ -30,31 +71,24 @@ function configurarSockets(io) {
             console.log(`[AUDIO CAPTURADO] El usuario dijo: "${transcripcion}"`);
             
             try {
-                // Leer el contexto actual del vehiculo
                 const estadoActual = await leerEstado();
-                
-                // Enviar transcripcion y telemetria al cerebro IA
                 const respuestaIA = await procesarComando(transcripcion, estadoActual);
                 
-                // Evaluar la decision del modelo
                 if (respuestaIA.tipo === 'texto') {
-                    // Emitir rechazo o duda tecnica al cliente
                     socket.emit('notificacion_asistente', respuestaIA.respuesta);
                 } else if (respuestaIA.tipo === 'accion') {
-                    // Notificar inicio de operaciones en la interfaz
                     socket.emit('notificacion_asistente', 'Ejecutando parámetros solicitados...');
                     console.log('Instrucciones recibidas de la IA:', respuestaIA.instrucciones);
                     
-                    // Procesar logica y calcular el nuevo estado del vehiculo
                     const estadoCalculado = await procesarAcciones(respuestaIA.instrucciones);
-                    
-                    // Guardar en disco y aplicar seguridad XSS mediante el guardian
                     const estadoFinal = await actualizarEstado(estadoCalculado);
                     
-                    // Sincronizar todos los tableros conectados en tiempo real
+                    // Sincronizar el tablero web
                     io.emit('estado_vehiculo', estadoFinal);
 
-                    // Buscar y emitir retroalimentacion de voz si el modelo la incluyo
+                    // Sincronizar la maqueta física
+                    sincronizarHardware(estadoFinal);
+
                     const msjVoz = respuestaIA.instrucciones.find(i => i.funcion === 'asistir_conductor');
                     if (msjVoz && msjVoz.argumentos.mensaje_voz) {
                         socket.emit('notificacion_asistente', msjVoz.argumentos.mensaje_voz);
@@ -66,12 +100,10 @@ function configurarSockets(io) {
             }
         });
 
-        // Registrar desconexion
         socket.on('disconnect', () => {
             console.log(`Tablero desconectado: ${socket.id}`);
         });
     });
 }
 
-// Exportar modulo para inyectarlo en el servidor principal
 module.exports = configurarSockets;

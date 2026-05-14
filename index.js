@@ -38,7 +38,9 @@ configurarSockets(io);
 // Definir puerto
 const PORT = process.env.PORT || 8080;
 
+const IP = 'localhost';
+
 // Iniciar servidor
-server.listen(PORT, () => {
-    console.log(`Sistema ADAS iniciado en http://localhost:${PORT}`);
+server.listen(PORT, IP, () => {
+    console.log(`Sistema ADAS iniciado en http://${IP}:${PORT}`);
 });

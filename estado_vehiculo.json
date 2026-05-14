@@ -4,20 +4,26 @@
     "limpiaparabrisas": "apagado"
   },
   "climatizacion_hvac": {
-    "temperatura_objetivo_grados": 25,
-    "recirculacion_activa": false
+    "temperatura_objetivo_grados": 22,
+    "recirculacion_activa": false,
+    "aire_acondicionado_activo": true
   },
   "carroceria_accesos": {
     "ventanas_porcentaje_apertura": {
-      "piloto": 1,
-      "copiloto": 1,
-      "trasera_izquierda": 1,
-      "trasera_derecha": 1
+      "piloto": 0,
+      "copiloto": 0,
+      "trasera_izquierda": 0,
+      "trasera_derecha": 0
     },
-    "seguros_bloqueados": true
+    "seguros_bloqueados": {
+      "piloto": true,
+      "trasera_derecha": true,
+      "copiloto": true,
+      "trasera_izquierda": true
+    }
   },
   "iluminacion": {
-    "faros_principales": "automatico",
+    "faros_principales": "apagados",
     "luz_cortesia_encendida": false
   },
   "telemetria_marcha": {
@@ -28,7 +34,8 @@
   },
   "infoentretenimiento": {
     "multimedia_reproduciendo": true,
-    "volumen_audio_porcentaje": 15,
+    "titulo_contenido": "plush by Stone Temple Pilots",
+    "volumen_audio_porcentaje": 25,
     "fuente_audio": "bluetooth"
   }
 }
