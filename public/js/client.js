@@ -10,6 +10,40 @@ const ondaAudio = document.getElementById('onda-audio');
 let estaGrabando = false;
 let recognition;
 
+// Configuración del Motor de Voz
+const synth = window.speechSynthesis;
+let vozAsistente = null;
+
+// Cargar voces disponibles en el sistema
+function cargarVoces() {
+    const voces = synth.getVoices();
+    // Priorizar español de México, luego cualquier español, o tomar la primera por defecto
+    vozAsistente = voces.find(v => v.lang === 'es-MX') ||
+        voces.find(v => v.lang.includes('es')) ||
+        voces[0];
+}
+
+if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = cargarVoces;
+}
+
+// Función para emitir la voz del copiloto
+function reproducirVoz(texto) {
+    if (!synth) return;
+
+    // Cortar cualquier audio previo para que no se encolen los mensajes
+    synth.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(texto);
+    if (vozAsistente) utterance.voice = vozAsistente;
+
+    utterance.lang = 'es-MX';
+    utterance.rate = 1.0;  // Velocidad normal
+    utterance.pitch = 1.0; // Tono estándar natural
+
+    synth.speak(utterance);
+}
+
 function crearFilaTelemetria(clasesIcono, etiqueta, valorTexto) {
     const contenedorFila = document.createElement('div');
     contenedorFila.className = 'dato-telemetria';
@@ -20,7 +54,7 @@ function crearFilaTelemetria(clasesIcono, etiqueta, valorTexto) {
     const envolturaTexto = document.createElement('span');
     const textoNegrita = document.createElement('strong');
     textoNegrita.textContent = `${etiqueta}: `;
-    
+
     envolturaTexto.appendChild(textoNegrita);
     envolturaTexto.appendChild(document.createTextNode(valorTexto));
 
@@ -32,7 +66,7 @@ function crearFilaTelemetria(clasesIcono, etiqueta, valorTexto) {
 
 function renderizarTelemetria(estado) {
     contenedorEstado.textContent = '';
-    
+
     const { entorno_exterior, climatizacion_hvac, carroceria_accesos, iluminacion, infoentretenimiento } = estado;
 
     // Datos de Clima y Luces 
@@ -77,10 +111,10 @@ function renderizarTelemetria(estado) {
         if (ventanas[posicion] !== undefined) {
             const item = document.createElement('div');
             item.className = posicion === 'piloto' ? 'ventana-item ventana-piloto' : 'ventana-item';
-            
+
             const textoPosicion = document.createElement('span');
             textoPosicion.textContent = posicion.charAt(0).toUpperCase() + posicion.slice(1).replace('_', ' ');
-            
+
             const textoValor = document.createElement('span');
             textoValor.textContent = `${ventanas[posicion]}%`;
 
@@ -103,7 +137,7 @@ function renderizarTelemetria(estado) {
     contenedorSeguros.appendChild(cabeceraSeguros);
 
     const listaSeguros = document.createElement('div');
-    listaSeguros.className = 'lista-ventanas'; // Reutilizamos la clase CSS para el layout
+    listaSeguros.className = 'lista-ventanas';
 
     const seguros = carroceria_accesos.seguros_bloqueados;
     const ordenSeguros = ['piloto', ...Object.keys(seguros).filter(k => k !== 'piloto')];
@@ -112,15 +146,15 @@ function renderizarTelemetria(estado) {
         if (seguros[posicion] !== undefined) {
             const item = document.createElement('div');
             item.className = posicion === 'piloto' ? 'ventana-item ventana-piloto' : 'ventana-item';
-            
+
             const textoPosicion = document.createElement('span');
             textoPosicion.textContent = posicion.charAt(0).toUpperCase() + posicion.slice(1).replace('_', ' ');
-            
+
             const contenedorValor = document.createElement('span');
             const iconoSeguro = document.createElement('i');
             iconoSeguro.className = seguros[posicion] ? 'fa-solid fa-lock icono-inactivo' : 'fa-solid fa-lock-open icono-alerta';
             iconoSeguro.style.marginRight = '6px';
-            
+
             contenedorValor.appendChild(iconoSeguro);
             contenedorValor.appendChild(document.createTextNode(seguros[posicion] ? 'Bloqueado' : 'Desbloqueado'));
 
@@ -135,7 +169,7 @@ function renderizarTelemetria(estado) {
 
 function agregarAccionHistorial(mensajeCrudo) {
     const nuevoElemento = document.createElement('li');
-    nuevoElemento.textContent = mensajeCrudo; 
+    nuevoElemento.textContent = mensajeCrudo;
     listaAcciones.prepend(nuevoElemento);
 
     while (listaAcciones.children.length > 4) {
@@ -158,6 +192,9 @@ socket.on('estado_vehiculo', (estado) => {
 socket.on('notificacion_asistente', (mensaje) => {
     textoTranscrito.textContent = mensaje;
     agregarAccionHistorial(`Copiloto: ${mensaje}`);
+
+    // Reproducir acústicamente lo que responde la IA
+    reproducirVoz(mensaje);
 });
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -174,7 +211,7 @@ if (!SpeechRecognition) {
     recognition.onstart = () => {
         estaGrabando = true;
         areaVoz.classList.add('grabando');
-        
+
         ondaAudio.classList.replace('onda-oculta', 'onda-activa');
         textoTranscrito.textContent = 'Te escucho...';
     };
@@ -189,7 +226,7 @@ if (!SpeechRecognition) {
     recognition.onend = () => {
         estaGrabando = false;
         areaVoz.classList.remove('grabando');
-        
+
         ondaAudio.classList.replace('onda-activa', 'onda-oculta');
     };
 
@@ -201,8 +238,13 @@ if (!SpeechRecognition) {
     };
 
     areaVoz.addEventListener('click', () => {
+        // Silenciar al asistente inmediatamente si el usuario presiona el botón
+        if (synth && synth.speaking) {
+            synth.cancel();
+        }
+
         if (!estaGrabando) {
-            try { recognition.start(); } catch (e) {}
+            try { recognition.start(); } catch (e) { }
         } else {
             recognition.stop();
         }

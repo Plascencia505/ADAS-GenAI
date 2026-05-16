@@ -36,21 +36,17 @@ const tools = [
             },
             {
                 name: "gestionar_seguros",
-                description: "Bloquea o desbloquea los seguros de las puertas",
+                description: "Bloquea o desbloquea los seguros de las puertas individuales o de todas en conjunto",
                 parameters: {
                     type: "OBJECT",
                     properties: {
-                        seguros_bloqueados: { 
-                            type: "OBJECT",
-                            properties: {
-                                piloto: { type: "BOOLEAN" },
-                                copiloto: { type: "BOOLEAN" },
-                                trasera_izquierda: { type: "BOOLEAN" },
-                                trasera_derecha: { type: "BOOLEAN" }
-                            }
-                        }
+                        puerta_objetivo: { 
+                            type: "STRING", 
+                            enum: ["piloto", "copiloto", "trasera_izquierda", "trasera_derecha", "todas"] 
+                        },
+                        seguros_bloqueados: { type: "BOOLEAN" }
                     },
-                    required: ["seguros_bloqueados"]
+                    required: ["puerta_objetivo", "seguros_bloqueados"]
                 }
             },
             {
@@ -84,6 +80,22 @@ const tools = [
                             description: "Nombre de la estacion de radio, cancion, artista o podcast solicitado"
                         }
                     }
+                }
+            },
+            {
+                name: "rutina_salida_vehiculo",
+                description: "Ejecuta la rutina de apagado cuando el usuario indica que va a bajar del vehiculo. Cierra ventanas, apaga AC, pausa musica, apaga faros y desbloquea seguros.",
+                parameters: {
+                    type: "OBJECT",
+                    properties: {}
+                }
+            },
+            {
+                name: "rutina_ingreso_vehiculo",
+                description: "Ejecuta la rutina de bienvenida cuando el usuario indica que ha subido al vehiculo. Enciende el AC, reanuda multimedia, enciende luces de cortesia y bloquea seguros.",
+                parameters: {
+                    type: "OBJECT",
+                    properties: {}
                 }
             },
             {

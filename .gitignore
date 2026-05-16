@@ -1,3 +1,4 @@
 node_modules/
 .env
+# ignorar los cambios constantes en el gemelo digital
 estado_vehiculo.json

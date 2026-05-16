@@ -4,9 +4,9 @@
     "limpiaparabrisas": "apagado"
   },
   "climatizacion_hvac": {
-    "temperatura_objetivo_grados": 22,
-    "recirculacion_activa": false,
-    "aire_acondicionado_activo": true
+    "temperatura_objetivo_grados": 20,
+    "recirculacion_activa": true,
+    "aire_acondicionado_activo": false
   },
   "carroceria_accesos": {
     "ventanas_porcentaje_apertura": {
@@ -16,15 +16,15 @@
       "trasera_derecha": 0
     },
     "seguros_bloqueados": {
-      "piloto": true,
-      "trasera_derecha": true,
-      "copiloto": true,
-      "trasera_izquierda": true
+      "piloto": false,
+      "trasera_derecha": false,
+      "copiloto": false,
+      "trasera_izquierda": false
     }
   },
   "iluminacion": {
-    "faros_principales": "apagados",
-    "luz_cortesia_encendida": false
+    "faros_principales": "apagado",
+    "luz_cortesia_encendida": true
   },
   "telemetria_marcha": {
     "velocidad_kmh": 0,
@@ -34,8 +34,8 @@
   },
   "infoentretenimiento": {
     "multimedia_reproduciendo": true,
-    "titulo_contenido": "plush by Stone Temple Pilots",
-    "volumen_audio_porcentaje": 25,
-    "fuente_audio": "bluetooth"
+    "titulo_contenido": "La mejor FM",
+    "volumen_audio_porcentaje": 40,
+    "fuente_audio": "radio"
   }
 }
