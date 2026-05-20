@@ -5,7 +5,7 @@ const { SerialPort } = require('serialport');
 
 // Configuración del enlace físico con el microcontrolador
 const puertoSerial = new SerialPort({
-    path: 'COM11',
+    path: 'COM5',
     baudRate: 115200,
     autoOpen: true
 });
