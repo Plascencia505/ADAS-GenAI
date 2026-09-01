@@ -11,7 +11,7 @@
 
 ## ✨ Características Principales
 
-* [cite_start]**Comprensión Contextual:** Gracias a Gemini 3.1 Flash Lite, el sistema entiende intenciones como *"hace calor"* o *"la resolana está fuerte"* para actuar sobre el clima o las ventanas.
+**Comprensión Contextual:** Gracias a Gemini 3.1 Flash Lite, el sistema entiende intenciones como *"hace calor"* o *"la resolana está fuerte"* para actuar sobre el clima o las ventanas.
 * **Gemelo Digital (State Management):** Sincronización constante entre un estado JSON persistente y la interfaz visual.
 * **Control de Dominio Estricto:** La IA está programada para filtrar peticiones ajenas a la conducción, respondiendo únicamente a necesidades del vehículo.
 * **Arquitectura Reactiva:** Comunicación bidireccional mediante WebSockets para actualizaciones de telemetría instantáneas.

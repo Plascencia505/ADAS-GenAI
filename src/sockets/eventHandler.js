@@ -11,7 +11,7 @@ const puertoSerial = new SerialPort({
 });
 
 puertoSerial.on('open', () => {
-    console.log('Enlace serial establecido con éxito en COM11 a 115200 baudios.');
+    console.log('Enlace serial establecido con éxito en el puerto serial.');
 });
 
 puertoSerial.on('error', (err) => {
