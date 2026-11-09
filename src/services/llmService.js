@@ -21,7 +21,7 @@ const tools = [
             },
             {
                 name: "controlar_ventanas",
-                description: "Ajusta el porcentaje de apertura de una ventana especifica o todas",
+                description: "Ajusta el nivel de apertura de una ventana especifica o todas. Solo admite tres estados discretos: 0 (cerrada), 50 (entreabierta / a la mitad) o 100 (totalmente abierta).",
                 parameters: {
                     type: "OBJECT",
                     properties: {
@@ -29,7 +29,10 @@ const tools = [
                             type: "STRING", 
                             enum: ["piloto", "copiloto", "trasera_izquierda", "trasera_derecha", "todas"] 
                         },
-                        porcentaje_apertura: { type: "NUMBER" }
+                        porcentaje_apertura: { 
+                            type: "NUMBER",
+                            description: "Valor estricto permitido: 0 para cerrar, 50 para entreabrir, o 100 para abrir por completo."
+                        }
                     },
                     required: ["ventana_objetivo", "porcentaje_apertura"]
                 }
@@ -116,7 +119,7 @@ const tools = [
 // Configurar el modelo con el rol de sistema estricto
 // Se utiliza la version estable mas reciente para optimizar latencia
 const model = genAI.getGenerativeModel({
-    model: "gemini-3.1-flash-lite",
+    model: "gemini-2.5-flash",
     tools: tools,
     systemInstruction: "Eres un copiloto inteligente de un vehiculo ADAS. Tu objetivo es la personalizacion y mejora de la experiencia a bordo. Analiza el estado de los sensores y la peticion del usuario para orquestar acciones que lleguen a su comodidad. Si el usuario pide o pregunta algo que no tenga relacion con el confort, el estado o la conduccion del vehiculo, responde estrictamente con la frase 'No puedo ayudarte con eso' y no llames a ninguna funcion."
 });

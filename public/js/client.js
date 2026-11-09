@@ -14,10 +14,16 @@ let recognition;
 const synth = window.speechSynthesis;
 let vozAsistente = null;
 
+// Diccionario para la presentación visual de la apertura
+const mapaApertura = {
+    0: 'Cerrada',
+    50: 'Entreabierta',
+    100: 'Abierta'
+};
+
 // Cargar voces disponibles en el sistema
 function cargarVoces() {
     const voces = synth.getVoices();
-    // Priorizar español de México, luego cualquier español, o tomar la primera por defecto
     vozAsistente = voces.find(v => v.lang === 'es-MX') ||
         voces.find(v => v.lang.includes('es')) ||
         voces[0];
@@ -30,16 +36,14 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
 // Función para emitir la voz del copiloto
 function reproducirVoz(texto) {
     if (!synth) return;
-
-    // Cortar cualquier audio previo para que no se encolen los mensajes
     synth.cancel();
 
     const utterance = new SpeechSynthesisUtterance(texto);
     if (vozAsistente) utterance.voice = vozAsistente;
 
     utterance.lang = 'es-MX';
-    utterance.rate = 1.0;  // Velocidad normal
-    utterance.pitch = 1.0; // Tono estándar natural
+    utterance.rate = 1.0; 
+    utterance.pitch = 1.0; 
 
     synth.speak(utterance);
 }
@@ -116,7 +120,9 @@ function renderizarTelemetria(estado) {
             textoPosicion.textContent = posicion.charAt(0).toUpperCase() + posicion.slice(1).replace('_', ' ');
 
             const textoValor = document.createElement('span');
-            textoValor.textContent = `${ventanas[posicion]}%`;
+            // Aquí aplicamos la traducción visual mediante el diccionario
+            const valorNumerico = ventanas[posicion];
+            textoValor.textContent = mapaApertura[valorNumerico] || 'Entreabierta';
 
             item.appendChild(textoPosicion);
             item.appendChild(textoValor);
@@ -192,8 +198,6 @@ socket.on('estado_vehiculo', (estado) => {
 socket.on('notificacion_asistente', (mensaje) => {
     textoTranscrito.textContent = mensaje;
     agregarAccionHistorial(`Copiloto: ${mensaje}`);
-
-    // Reproducir acústicamente lo que responde la IA
     reproducirVoz(mensaje);
 });
 
@@ -211,7 +215,6 @@ if (!SpeechRecognition) {
     recognition.onstart = () => {
         estaGrabando = true;
         areaVoz.classList.add('grabando');
-
         ondaAudio.classList.replace('onda-oculta', 'onda-activa');
         textoTranscrito.textContent = 'Te escucho...';
     };
@@ -226,7 +229,6 @@ if (!SpeechRecognition) {
     recognition.onend = () => {
         estaGrabando = false;
         areaVoz.classList.remove('grabando');
-
         ondaAudio.classList.replace('onda-activa', 'onda-oculta');
     };
 
@@ -238,7 +240,6 @@ if (!SpeechRecognition) {
     };
 
     areaVoz.addEventListener('click', () => {
-        // Silenciar al asistente inmediatamente si el usuario presiona el botón
         if (synth && synth.speaking) {
             synth.cancel();
         }

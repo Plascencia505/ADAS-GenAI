@@ -5,6 +5,18 @@ function limitarRango(valor, minimo, maximo) {
     return Math.min(Math.max(valor, minimo), maximo);
 }
 
+function limitarRango(valor, minimo, maximo) {
+    return Math.min(Math.max(valor, minimo), maximo);
+}
+
+// Función para forzar los escalones discretos del frontend (0, 50, 100)
+function normalizarAperturaVentana(valor) {
+    const v = Number(valor) || 0;
+    if (v >= 75) return 100;
+    if (v >= 25) return 50;
+    return 0;
+}
+
 // Procesar las instrucciones de la IA y aplicarlas al estado actual
 
 async function procesarAcciones(instrucciones) {
@@ -32,8 +44,8 @@ async function procesarAcciones(instrucciones) {
                     let { ventana_objetivo, porcentaje_apertura } = argumentos;
                     const vPath = estado.carroceria_accesos.ventanas_porcentaje_apertura;
 
-                    // Límite de porcentaje (0% a 100%)
-                    porcentaje_apertura = limitarRango(porcentaje_apertura, 0, 100);
+                    // Normalizar estrictamente a 0%, 50% o 100%
+                    porcentaje_apertura = normalizarAperturaVentana(porcentaje_apertura);
 
                     // Blindaje Climático
                     if (estado.entorno_exterior.limpiaparabrisas !== 'apagado' && porcentaje_apertura > 0) {
@@ -103,9 +115,9 @@ async function procesarAcciones(instrucciones) {
                     break;
 
                 case 'gestionar_multimedia':
-                    // Límite de volumen (0% a 100%) 
+                    // Límite de volumen (0% a 60%) 
                     if (argumentos.volumen_audio_porcentaje !== undefined) {
-                        argumentos.volumen_audio_porcentaje = limitarRango(argumentos.volumen_audio_porcentaje, 0, 100);
+                        argumentos.volumen_audio_porcentaje = limitarRango(argumentos.volumen_audio_porcentaje, 0, 60);
                     }
                     Object.assign(estado.infoentretenimiento, argumentos);
                     break;
@@ -127,8 +139,8 @@ async function procesarAcciones(instrucciones) {
                     // 4. Detener reproducción multimedia
                     estado.infoentretenimiento.multimedia_reproduciendo = false;
 
-                    // Apagar faros y encender luz de cortesía para visibilidad al salir
-                    estado.iluminacion.faros_principales = 'apagado';
+                    // Apagar faros (unificado en plural) y encender luz de cortesía para visibilidad al salir
+                    estado.iluminacion.faros_principales = 'apagados';
                     estado.iluminacion.luz_cortesia_encendida = true;
 
                     // Inyectar el mensaje por defecto si ninguna regla superior falló
@@ -138,7 +150,7 @@ async function procesarAcciones(instrucciones) {
                 case 'rutina_ingreso_vehiculo':
                     // Bloquear todas las puertas por seguridad al prepararse para la marcha
                     Object.keys(estado.carroceria_accesos.seguros_bloqueados).forEach(p => estado.carroceria_accesos.seguros_bloqueados[p] = true);
-                    
+
                     // Encender la luz de cortesía para facilitar la visibilidad en la cabina
                     estado.iluminacion.luz_cortesia_encendida = true;
 

@@ -11,7 +11,7 @@ let escribiendo = false;
 // Purificar de forma recursiva los valores de texto entrantes
 function purificarObjeto(obj) {
     const objetoLimpio = Array.isArray(obj) ? [] : {};
-    
+
     for (const [clave, valor] of Object.entries(obj)) {
         if (typeof valor === 'string') {
             objetoLimpio[clave] = xss(valor);
@@ -21,7 +21,7 @@ function purificarObjeto(obj) {
             objetoLimpio[clave] = valor;
         }
     }
-    
+
     return objetoLimpio;
 }
 
@@ -48,26 +48,26 @@ async function actualizarEstado(nuevosParametros) {
 
     try {
         const estadoActual = await leerEstado();
-        
+
         // Sanitizar los nuevos datos contra ataques XSS
         const parametrosLimpios = purificarObjeto(nuevosParametros);
 
         // Crear una copia del estado para no mutar la referencia original
         const estadoActualizado = { ...estadoActual };
-        
+
         // Fusionar las modificaciones manteniendo la estructura de categorías
         for (const [categoria, valores] of Object.entries(parametrosLimpios)) {
             if (estadoActualizado[categoria]) {
-                estadoActualizado[categoria] = { 
-                    ...estadoActualizado[categoria], 
-                    ...valores 
+                estadoActualizado[categoria] = {
+                    ...estadoActualizado[categoria],
+                    ...valores
                 };
             }
         }
 
         // Escribir el nuevo estado en formato legible
         await fs.writeFile(rutaEstado, JSON.stringify(estadoActualizado, null, 2), 'utf-8');
-        
+
         return estadoActualizado;
     } catch (error) {
         console.error('Error al actualizar el estado:', error);
