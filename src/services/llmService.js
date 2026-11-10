@@ -121,18 +121,18 @@ const tools = [
 const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
     tools: tools,
-    systemInstruction: "Eres un copiloto inteligente de un vehiculo ADAS. Tu objetivo es la personalizacion y mejora de la experiencia a bordo. Analiza el estado de los sensores y la peticion del usuario para orquestar acciones que lleguen a su comodidad. Si el usuario pide o pregunta algo que no tenga relacion con el confort, el estado o la conduccion del vehiculo, responde estrictamente con la frase 'No puedo ayudarte con eso' y no llames a ninguna funcion."
+    systemInstruction: "Eres un copiloto inteligente de un vehiculo ADAS. Tu objetivo es la personalizacion y mejora de la experiencia a bordo. Analiza el estado de los sensores y la peticion del usuario para orquestar acciones que lleguen a su comodidad. REGLA CRÍTICA: Si el usuario emite una petición compuesta (usa conectores como 'y', 'además') o requiere de múltiples ajustes distintos (ej. rutinas + acciones específicas), DEBES realizar múltiples llamadas a funciones de manera simultánea para cubrir toda la orden. Si el usuario pide algo fuera de la conducción o confort, responde estrictamente 'No puedo ayudarte con eso' sin llamar funciones."
 });
 
 // Procesar la transcripcion y el estado actual para generar una decision
 async function procesarComando(transcripcion, estadoActual) {
     try {
         const chat = model.startChat();
-        
+
         const prompt = `
             Estado actual del vehiculo: ${JSON.stringify(estadoActual)}
             Peticion del conductor: "${transcripcion}"
-            ¿Que acciones debo tomar para cumplir con la peticion?
+            ¿Que acciones debo tomar para cumplir con la peticion? Si la orden implica varias tareas separadas, invoca todas las funciones necesarias en esta misma respuesta.
         `;
 
         const result = await chat.sendMessage(prompt);
