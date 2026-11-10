@@ -2,6 +2,7 @@ const { leerEstado, actualizarEstado } = require('../utils/stateManager');
 const { procesarComando } = require('../services/llmService');
 const { procesarAcciones } = require('../controllers/logicController');
 const { SerialPort } = require('serialport');
+const redisClient = require('../config/redisClient');
 
 // Configuración del enlace físico con el microcontrolador
 const puertoSerial = new SerialPort({
@@ -52,6 +53,11 @@ function sincronizarHardware(estado) {
     }
 }
 
+// Función para normalizar la petición del usuario
+function normalizarComando(texto) {
+    return texto.toLowerCase().trim().replace(/[^\w\s]/gi, '');
+}
+
 // Configurar los eventos del socket
 function configurarSockets(io) {
     io.on('connection', async (socket) => {
@@ -83,24 +89,49 @@ function configurarSockets(io) {
 
             try {
                 const estadoActual = await leerEstado();
-                const respuestaIA = await procesarComando(transcripcion, estadoActual);
+                const claveCache = normalizarComando(transcripcion);
+                let instruccionesAProcesar = null;
+                let mensajeRespuesta = 'Ejecutando parámetros solicitados...';
 
-                if (respuestaIA.tipo === 'texto') {
-                    socket.emit('notificacion_asistente', respuestaIA.respuesta);
-                } else if (respuestaIA.tipo === 'accion') {
-                    socket.emit('notificacion_asistente', 'Ejecutando parámetros solicitados...');
-                    console.log('Instrucciones recibidas de la IA:', respuestaIA.instrucciones);
+                // Verificar si el comando existe en Redis (Cache Hit)
+                if (redisClient.isReady) {
+                    const cacheResult = await redisClient.get(claveCache);
+                    if (cacheResult) {
+                        console.log(`[CACHÉ HIT] Instrucción recuperada de Redis para: "${claveCache}"`);
+                        instruccionesAProcesar = JSON.parse(cacheResult);
+                        mensajeRespuesta = 'Ejecutando parámetros desde memoria rápida...';
+                    }
+                }
 
-                    const estadoCalculado = await procesarAcciones(respuestaIA.instrucciones);
+                // Si no está en caché (Cache Miss), consultar a Gemini
+                if (!instruccionesAProcesar) {
+                    console.log(`[CACHÉ MISS] Consultando a Gemini para: "${transcripcion}"`);
+                    const respuestaIA = await procesarComando(transcripcion, estadoActual);
+
+                    if (respuestaIA.tipo === 'texto') {
+                        return socket.emit('notificacion_asistente', respuestaIA.respuesta);
+                    }
+
+                    if (respuestaIA.tipo === 'accion') {
+                        instruccionesAProcesar = respuestaIA.instrucciones;
+
+                        // Guardar en Redis para futuras peticiones (Expiración opcional: 7 días = 604800s)
+                        if (redisClient.isReady) {
+                            await redisClient.setEx(claveCache, 604800, JSON.stringify(instruccionesAProcesar));
+                        }
+                    }
+                }
+
+                // Ejecutar las instrucciones en el controlador lógico, validando reglas de seguridad físicas
+                if (instruccionesAProcesar) {
+                    socket.emit('notificacion_asistente', mensajeRespuesta);
+                    const estadoCalculado = await procesarAcciones(instruccionesAProcesar);
                     const estadoFinal = await actualizarEstado(estadoCalculado);
 
-                    // Sincronizar el tablero web
                     io.emit('estado_vehiculo', estadoFinal);
-
-                    // Sincronizar la maqueta física
                     sincronizarHardware(estadoFinal);
 
-                    const msjVoz = respuestaIA.instrucciones.find(i => i.funcion === 'asistir_conductor');
+                    const msjVoz = instruccionesAProcesar.find(i => i.funcion === 'asistir_conductor');
                     if (msjVoz && msjVoz.argumentos.mensaje_voz) {
                         socket.emit('notificacion_asistente', msjVoz.argumentos.mensaje_voz);
                     }
