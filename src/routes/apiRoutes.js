@@ -1,6 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { leerEstado, actualizarEstado } = require('../utils/stateManager');
+const redisClient = require('../config/redisClient');
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ router.post('/estado', [
     // Validar booleanos
     body('telemetria_marcha.motor_encendido').optional().isBoolean()
 ], async (req, res) => {
-    
+
     // Revisar si el middleware detectó anomalías en los tipos de datos
     const errores = validationResult(req);
     if (!errores.isEmpty()) {
@@ -36,6 +37,36 @@ router.post('/estado', [
         res.json({ mensaje: 'Telemetría actualizada correctamente', estado: nuevoEstado });
     } catch (error) {
         res.status(500).json({ error: 'Fallo crítico al procesar la actualización' });
+    }
+});
+
+// Inspeccionar todo el contenido actual del caché
+router.get('/cache', async (req, res) => {
+    try {
+        if (!redisClient.isReady) {
+            return res.status(503).json({ error: 'Servicio Redis no disponible' });
+        }
+
+        // Obtener todas las claves guardadas
+        const claves = await redisClient.keys('*');
+        const resultados = {};
+
+        // Recuperar y parsear el valor de cada clave
+        for (const clave of claves) {
+            const valor = await redisClient.get(clave);
+            const ttl = await redisClient.ttl(clave);
+            resultados[clave] = {
+                ttl_segundos: ttl,
+                instrucciones: JSON.parse(valor)
+            };
+        }
+
+        res.json({
+            total_comandos_cacheados: claves.length,
+            cache: resultados
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al consultar el caché de Redis' });
     }
 });
 
